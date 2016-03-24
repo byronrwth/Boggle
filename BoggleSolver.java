@@ -22,7 +22,13 @@ public class BoggleSolver
     private static character[][] node;
     private static char foundLetter;
     
-    private static Queue<String> wordsQueue;
+    static private Queue<String> wordsQueue;
+    
+    static private Stack<character> eachsearchStack;
+    
+    static private Queue<character> neighborQueue;
+    
+    
 //    private Bag<character>[] adj;
 //    private static Bag<Edge>[] adj;
 //    private static Bag<DirectedEdge>[] adj;
@@ -33,12 +39,13 @@ public class BoggleSolver
         private final int R = 26;        // for english charachters search
 
         private Node root = new Node();
-//        public Node found = null;
+        
+
         public Node found = root;  // this node indicates where current search reaches
         
         private class Node {
             private Integer val = null; 
-//            private Node[] next = new Node[R];
+
             private Node[] next = null;
             private String word = null; //save whole string key as word at end node 
         }
@@ -160,104 +167,53 @@ public class BoggleSolver
         public void put(String key, Integer val) {
             if (val == null) delete(key);
             else {
-                if (trietest) StdOut.println(" put(): start to save word: " + key );
                 root = put(root, key, val, 0);
             }
         }
         
         private Node put(Node x, String key, Integer val, int d) {
-            /*
-             if (x == root && root != null) {
-                if (trietest) StdOut.println("node of root:" + root + " exist!");
-                
-                if (root.next == null) { // this is the first time to create child node under root
-                    root.next = new Node[R];
-                    root.next[key.charAt(d)-65] = new Node();
-                    Node x_child = root.next[key.charAt(d)-65];
-                    
-                    if (trietest) StdOut.println("create new node(): " + x_child +" for root.next[" + key.charAt(d) + "]");
-//                    if (trietest) StdOut.println("x: "+key.charAt(d)+" is at: "+ x);
-                }
-                else if ( root.next[key.charAt(d)-65] == null) { // when this child is created, add into root's children
-                    root.next[key.charAt(d)-65] = new Node();
-                    Node x_child = root.next[key.charAt(d)-65];
-                    if (trietest) StdOut.println("create new node(): " + x_child + " for root.next[" + key.charAt(d) + "]");
-//                    if (trietest) StdOut.println("x_child: "+key.charAt(d)+" is at: "+ x_child);
-                }
-                else { // this child already created under root
-                    if (trietest) StdOut.println("root.next[" + key.charAt(d) + "] already exists at: "+ x);
-                }  
-            }
-            else if (x == null) {
-                if (trietest) StdOut.println(" node of " + key.charAt(d)+ " index: "+d+" doesn't exist, create new node(): " ); 
-                x = new Node();
-                if (trietest) StdOut.println(x);
-            }
-            else { //x != null
-                if (trietest) StdOut.println(" key: "+key+" x node : " + x + " already exist! ");
-            }
-            */
-            
-//            int index = 0;
-            
-            if (x == null) {
-                if (d == 0) {if (trietest) StdOut.println(" node root doesn't exist, create new node(): " ); }
-                else {
-//                if (trietest) StdOut.println(" node x doesn't exist, create new node(): " ); 
-                    if (trietest) StdOut.println(" node of " + key.charAt(d-1)+ " depth: "+d+" doesn't exist, create new node(): " ); 
-                }
-                x = new Node();
-                if (trietest) StdOut.println(x);
-            }
 
+        	if (x == null) {
+        		if (d == 0) {
+        			StdOut.println(" root should alreadz created ! "); 
+        			throw new java.lang.NullPointerException();
+        		}
+        		else {
+					StdOut.println(" create a new node at depth: " + d + " for " + key.charAt(d-1));
+					x = new Node();
+                    x.val = -1;
+                    x.word = "*";
+        		}
+        	}
             
             //after creating node x, changing its value and check whether continue for its children
             if (d == (key.length())) {
                 x.val = val;
                 x.word = key;
-                if (trietest) StdOut.println("value: " + val);
                 if (trietest) {
-                    if( x.next == null)
-                        StdOut.println(" when "+key.charAt(d-1)+" is end node, "+key.charAt(d-1)+".next is null! x.word: " + x.word);
-                    else    
-                        StdOut.println(" when "+key.charAt(d-1)+" is end node, "+key.charAt(d-1)+".next is not null!: " + x.next);
-                        
-                }
+                	StdOut.println(" when "+key.charAt(d-1)+" is end node for key: " + key +  " x.val "+ x.val + " x.word "+ x.word);
+               }
+                
                 return  x;
             }
-            else { //d != key.length()
-                // not yet end node
-                
-                // check first whether other words end at this node, if yes don't need to allocate new next[], and don't overwrite valid val with -1 !!
-//                x.next = new Node[R];
-                
+            else { 
+            	
                 char c = key.charAt(d);
                 
-                if (trietest) StdOut.println("node x: " +x+ " is not ending node!"+" x.val: "+x.val+" x.word: "+x.word);
-                
-                if (x.val == null && x.word == null) {
+                if (x.val == null && x.word == null) {  // only for root node
                     x.val = -1;
                     x.word = "*";
                 }
                 
-//                if (trietest) System.out.prinln("letter: %c, %d ", c, c);
-                if (trietest) StdOut.println("now x.val: "+x.val+" x.word "+x.word);
+                if (trietest) StdOut.println("node x: is not ending node! reuse node x of ( "+" x.val: "+x.val+" x.word: "+x.word + ") go for next node: " + key.charAt(d) );
+
 
                 if (x.next == null) { // this is the first time to create child node under x
                     x.next = new Node[R];
-                    
                 }
-
-                
-                
                 
                 x.next[c-65] = put(x.next[c-65], key, val, d+1);
 
-//                if (trietest) StdOut.println("x: " + x);
-//                if (trietest) StdOut.println(" creating new child node: x.next["+c+"-65]: " + x.next[c-65]);
-//                for ( int i = 0; i< R; i++) {
-//                    if (trietest) StdOut.println("x: "+x+", x.next["+i+"]: " + x.next[i]);
-//                }
                 
                 return  x;
             }
@@ -269,21 +225,12 @@ public class BoggleSolver
     // Initializes the data structure using the given array of strings as the dictionary.
     // (You can assume each word in the dictionary contains only the uppercase letters A through Z.)
     public BoggleSolver(String[] dictionary) {
-        //dictionary-yawl.txt
-
         this.dict = new TrieR26ST();
         for (int i = 0; i < dictionary.length; i++) {
-            if (test) StdOut.println(" dict.put(): " + dictionary[i]);
             this.dict.put(dictionary[i], i);
         }
+        
         wordsQueue = null;
-        /*
-        if (test) {
-            // print results
-            for (String key : dict.keys()) {
-                StdOut.println(key + " " + dict.get(key));
-            }
-        }*/
     }
 
      
@@ -313,16 +260,18 @@ public class BoggleSolver
             this.row = row;
             this.col = col;
             this.v = row * N + col;
+            
 //            this.adj = null;
         }
     }
 
     
-    private character dfsBoardnext(character c) {
+    private Queue<character> dfsBoardnext(character c) {
         int row = c.row;
         int col = c.col;
         
         character next = null;
+        neighborQueue = new Queue<>();
         
         //up
         if (row > 0) {
@@ -335,13 +284,15 @@ public class BoggleSolver
                    // if yes, check this node has been searched by c before
 
                    next = node[row - 1][col - 1];
+                   neighborQueue.enqueue(next);
+                   if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
                    
-                   if ( !c.adj.contains(next.v) ) {
-                       //already added, means searched by c
-                       c.adj.add(next.v);
-                       if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
-                       return next;
-                   }
+//                   if ( !c.adj.contains(next.v) ) {
+//                       //already added, means searched by c
+//                       c.adj.add(next.v);
+//                       if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
+//                       return next;
+//                   }
                }
             }
             //up top
@@ -349,13 +300,16 @@ public class BoggleSolver
                 if (this.mark[row-1][col] != true) { 
                     
                     next = node[row - 1][col];
+                    neighborQueue.enqueue(next);
+                    if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
                     
-                    if ( !c.adj.contains(next.v) ) {
-                        //already added, means searched by c
-                        c.adj.add(next.v);
-                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
-                        return next;
-                    }
+                    
+//                    if ( !c.adj.contains(next.v) ) {
+//                        //already added, means searched by c
+//                        c.adj.add(next.v);
+//                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
+//                        return next;
+//                    }
                 }
             }
             // up right
@@ -363,13 +317,15 @@ public class BoggleSolver
                 if (this.mark[row-1][col+1] != true) { 
                     
                     next = node[row - 1][col + 1];
+                    neighborQueue.enqueue(next);
+                    if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
                     
-                    if ( !c.adj.contains(next.v) ) {
-                        //already added, means searched by c
-                        c.adj.add(next.v);
-                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
-                        return next;
-                    }
+//                    if ( !c.adj.contains(next.v) ) {
+//                        //already added, means searched by c
+//                        c.adj.add(next.v);
+//                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
+//                        return next;
+//                    }
                 }
             }
             
@@ -381,26 +337,32 @@ public class BoggleSolver
                 
                 if (this.mark[row][col-1] != true) { 
                     next = node[row][col - 1];
+                    neighborQueue.enqueue(next);
+                    if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
                     
-                    if ( !c.adj.contains(next.v) ) {
-                        //already added, means searched by c
-                        c.adj.add(next.v);
-                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
-                        return next;
-                    }
+                    
+//                    if ( !c.adj.contains(next.v) ) {
+//                        //already added, means searched by c
+//                        c.adj.add(next.v);
+//                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
+//                        return next;
+//                    }
                 }
              }
             //right
             if(col < this.N -1 ){
                 if (this.mark[row][col+1] != true) { 
                     next = node[row][col + 1];
+                    neighborQueue.enqueue(next);
+                    if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
                     
-                    if ( !c.adj.contains(next.v) ) {
-                        //already added, means searched by c
-                        c.adj.add(next.v);
-                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
-                        return next;
-                    }
+                    
+//                    if ( !c.adj.contains(next.v) ) {
+//                        //already added, means searched by c
+//                        c.adj.add(next.v);
+//                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
+//                        return next;
+//                    }
                 }
             }
         }
@@ -410,48 +372,65 @@ public class BoggleSolver
             if(col > 0){
                if (this.mark[row+1][col-1] != true) { 
                    next = node[row + 1][col - 1];
+                   neighborQueue.enqueue(next);
+                   if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
                    
-                   if ( !c.adj.contains(next.v) ) {
-                       //already added, means searched by c
-                       c.adj.add(next.v);
-                       if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
-                       return next;
-                   }
+                   
+//                   if ( !c.adj.contains(next.v) ) {
+//                       //already added, means searched by c
+//                       c.adj.add(next.v);
+//                       if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
+//                       return next;
+//                   }
                }
             }
             //up top
             {
                 if (this.mark[row+1][col] != true) { 
                     next = node[row + 1][col];
+                    neighborQueue.enqueue(next);
+                    if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
                     
-                    if ( !c.adj.contains(next.v) ) {
-                        //already added, means searched by c
-                        c.adj.add(next.v);
-                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
-                        return next;
-                    }
+                    
+//                    if ( !c.adj.contains(next.v) ) {
+//                        //already added, means searched by c
+//                        c.adj.add(next.v);
+//                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
+//                        return next;
+//                    }
                 }
             }
             // up right
             if(col < this.N -1 ){
                 if (this.mark[row+1][col+1] != true) { 
                     next = node[row + 1][col + 1];
+                    neighborQueue.enqueue(next);
+                    if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
                     
-                    if ( !c.adj.contains(next.v) ) {
-                        //already added, means searched by c
-                        c.adj.add(next.v);
-                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
-                        return next;
-                    }
+                    
+//                    if ( !c.adj.contains(next.v) ) {
+//                        //already added, means searched by c
+//                        c.adj.add(next.v);
+//                        if (test) StdOut.println( " dfsBoardnext: find new neighbor on board, continue: " + next.letter);
+//                        return next;
+//                    }
                 }
             }
             
         }
         
-        return next;
+        return neighborQueue;
     }
     
-    private boolean inWord(character c) {
+    private void resetWord() {
+    	for( int row = 0; row < N; row++ ) {
+    		for ( int col =0; col < N; col++ ) {
+    			this.mark[row][col] = false ;
+    		}
+    	}
+    }
+    
+    private boolean checkinWord(character c) {
         int row = c.v / N;
         int col = c.v % N;
         
@@ -462,14 +441,14 @@ public class BoggleSolver
         int row = c.v / N;
         int col = c.v % N;
         
-        this.mark[row][col] = true;;
+        this.mark[row][col] = true; 
     }
     
-    private void notInWord(character c) {
+    private void removefromWord(character c) {
         int row = c.v / N;
         int col = c.v % N;
         
-        this.mark[row][col] = false;;
+        this.mark[row][col] = false;  // for this search, c has been searched
     }
     
     
@@ -504,31 +483,72 @@ public class BoggleSolver
         return result;
     }
     
+    private character goback( ) {
+    	eachsearchStack.pop();
+    	while ( eachsearchStack.peek() != null && checkinWord( eachsearchStack.peek() ) == true ) {
+    		character temp = eachsearchStack.pop(); //pop out already searched characters, try to find a letter yet not used in current word
+    		removefromWord(temp);
+    		if (test) StdOut.println("checkWord : "+ temp.letter + "  pop out  " );
+    	}
+    	
+    	character next = eachsearchStack.peek() ; // can further search in current word
+    	
+    	return next;
+
+    	
+    } 
     private void checkWord(character c, character previous) {
-        
-        Stack<character> s = new Stack<character>();
-        
+
         if( c != null ) {
 
-            if (test) StdOut.println("start to check for: " + c.letter);
+            if (test) {
+            	StdOut.println("checkWord: start to check for: " + c.letter);
+            	if(previous != null) StdOut.println("checkWord : previous: " + previous.letter);
+            }
+            
+            //eachsearchStack.push(c);
             
             // step back to continue from previous node, if 
             // back.a) this node path is not in dict:
-            int result = dfsDict( c.letter );
-            if ( result == -1 ) {
-                if (test) StdOut.println( c.letter + " is not in dict! step back from: " + previous.letter);
-                
-                notInWord(c);
-                
-                // garantee c wont be chose by previous again !
-                if ( previous == null) return;
+            int result = dfsDict( c.letter, previous.letter );
+            
+            if ( result == -2 ) {  // character c is not in any node of dictionary
+            	character mynext = goback();
+            	
+            	if ( mynext != null) {
+            		if (test) StdOut.println("checkWord : continue search with  : " + mynext.letter);
+            		checkWord(mynext, null);
+            	}
+            	else {   // stack is empty now, stop current word search, find next letter to start a new search
+            		resetWord();
+            		return;    // finish this search , choose next letter on board to start next
+            	}
+            }		
+            else if ( result == -1 ) {
+                Queue<character> myneighbout = dfsBoardnext( c );
+                if (myneighbout != null ) {
+                	QueueToStack(myneighbout);
+                	setInWord(c);
+                    if (test) StdOut.println("checkWord : "+ c.letter + " is in dict, no words end here, keep on search more letters with neighbors" );
+                }
+                else {
+                    if (test) StdOut.println("checkWord : "+ c.letter + " is in dict, no words end here, but no neighbors, pop out" );
 
-                character next = dfsBoardnext( previous );
+                    character mynext = goback();
+                    
+                	if ( mynext != null) {
+                		if (test) StdOut.println("checkWord : continue search with  : " + mynext.letter);
+                		checkWord(mynext, null);
+                	}
+                	else {   // stack is empty now, stop current word search, find next letter to start a new search
+                		resetWord();
+                		return;    // finish this search , choose next letter on board to start next
+                	}
+                }
 
-                checkWord( next, previous );
             }
-            else { // if ( dfsDict( c ) == true ) this node path is in dict,
-                if (test) StdOut.println( c.letter + " is in dict: " );
+            else { // if dfsDict >= 0, at least 1 word is found ending at current letter, can further search
+                if (test) StdOut.println("checkWord: " + c.letter + " ends with a word in dict: " );
                 
                 // back.b)  but no child node anymore in dict, i.e. this word stops here
                 if ( this.dict.found.next == null ) { 
@@ -546,7 +566,7 @@ public class BoggleSolver
                         wordsQueue.enqueue(word);
                         
                         // after save this word path, release current character
-                        notInWord(c);
+//                        notInWord(c);
                         
                         if ( previous == null) return;
                         // step back
@@ -562,8 +582,8 @@ public class BoggleSolver
                     if ( previous == null) return;
                     s.push(previous);
                     
-                    setInWord(previous);
-                    setInWord(c);
+//                    setInWord(previous);
+//                    setInWord(c);
                     
                     // mark current c as been checking with dict, i.e. cannot be used twice
 //                    setInWord(c);
@@ -595,35 +615,36 @@ public class BoggleSolver
                 }    
             }
         }
-        // c== null, all neighbors from previous character have been searched, step back to previous node last
-        else {
-            if (test) StdOut.println("checkWord find null character! ");
-            if ( previous == null) return;
-            
-            //previous cannot find anymore neighbor, this path ends here, release previous, recursive from last
-            notInWord(previous);
-            
-            // clean neighbors, in case may back to this node again
-            previous.adj = null;
-            
-            character last = s.pop();
-            if (test) StdOut.println( previous.letter + " has no more neighbors on board, continue: " + last.letter);
-            //need stack to save recursive nodes
-            
-            if ( last == null) return;
-            character next = dfsBoardnext( last );
-            
-            checkWord( next, last );
-        }
+//        // c== null, all neighbors from previous character have been searched, step back to previous node last
+//        else {
+//            if (test) StdOut.println("checkWord find null character! ");
+//            if ( previous == null) return;
+//            
+//            //previous cannot find anymore neighbor, this path ends here, release previous, recursive from last
+////            notInWord(previous);
+//            
+//            // clean neighbors, in case may back to this node again
+//            previous.adj = null;
+//            
+//            character last = s.pop();
+//            if (test) StdOut.println( previous.letter + " has no more neighbors on board, continue: " + last.letter);
+//            //need stack to save recursive nodes
+//            
+//            if ( last == null) return;
+//            character next = dfsBoardnext( last );
+//            
+//            checkWord( next, last );
+//        }
     }
     
     private int map(int row, int col) {
         return row * N + col ;
     }
+    
     // Returns the set of all valid words in the given Boggle board, as an Iterable.
     public Iterable<String> getAllValidWords(BoggleBoard board) {
         
-        if (test) System.out.println(board.toString());
+        if (test) System.out.println("getAllValidWords :" + board.toString());
         this.board = board;
         M = board.rows();
         N = board.cols();
@@ -636,24 +657,24 @@ public class BoggleSolver
         for ( int i = 0; i < M; i++) {
             for ( int j = 0; j < N; j++) {
                 node[i][j] = new character(this.board.getLetter(i, j), i, j);
-                if (test) System.out.println(this.board.getLetter(i, j));
             }
         }    
         
         // start from every i, j for a loop
         for ( int i = 0; i < M; i++) {
             for ( int j = 0; j < N; j++) {
-//                this.stringdfs(i, j);
-//                character start = new character(this.board.getLetter(i,j), i, j);
-//                int start = map(i , j);
-//                char letter = this.board.getLetter(i,j);
-                count = 0;
-                
                 character startLetter = node[i][j];
-                if (test) StdOut.println("start: " + startLetter.letter);
+                
+                // every start from a letter on board is a new start
+                eachsearchStack = new Stack<character>();
+                eachsearchStack.push(startLetter);
+                // scan the whole board and store found words into the wordsQueue
                 checkWord(startLetter, null);
             }
         }
+        
+        if (test) StdOut.println(" getAllValidWords: finish all checkWord steps, now find words no. of " + wordsQueue.size());
+        
         return wordsQueue;
     }
 
@@ -661,7 +682,6 @@ public class BoggleSolver
     // Returns the score of the given word if it is in the dictionary, zero otherwise.
     // (You can assume the word contains only the uppercase letters A through Z.)
     public int scoreOf(String word) {
-
         if (this.dict.contains(word)) {
             int pointValue;
             int length = word.length();
@@ -673,7 +693,6 @@ public class BoggleSolver
             return pointValue;
         }
         else return 0;
-
     }
     
     public static void main(String[] args)
@@ -685,15 +704,14 @@ public class BoggleSolver
         
         BoggleBoard board = new BoggleBoard(args[1]);
 
-        {
-            int score = 0;
-            for (String word : solver.getAllValidWords(board))
-            {
-                StdOut.println(word);
-                score += solver.scoreOf(word);
-            }
-            StdOut.println("Score = " + score);
-        }
+        
+		int score = 0;
+		for (String word : solver.getAllValidWords(board)) {
+			StdOut.println(word);
+			score += solver.scoreOf(word);
+		}
+		StdOut.println("main(): Score = " + score);
+        
     }
     
 }
