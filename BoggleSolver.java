@@ -1,17 +1,13 @@
 import java.lang.*;
-import java.security.acl.LastOwnerException;
 import java.util.*;
-
 
 public class BoggleSolver
 {
-	private static int R = 26;
+    private static int R = 26;
     private boolean test = false;
     private boolean trietest = false;
-    
     private static boolean[][]  mark;
-    
-    //my own TrieR26 class
+
     private TrieR26ST dict;
     private BoggleBoard board;
     private static char[] word;
@@ -19,9 +15,7 @@ public class BoggleSolver
     private static int N;
     private static character[][] node;
 
-    
     static private Queue<String> wordsQueue;
-//    static private Stack<character> eachsearchStack;
     static private Queue<character> neighborQueue;
 
     private class Node {
@@ -32,11 +26,8 @@ public class BoggleSolver
     
     /*======inner class Trie26 =====================================================================*/
     private class TrieR26ST extends TrieST<Integer>{
-//        private final int R = 26;        // for english charachters search
-
         private Node root = new Node();
         public Node found = root;  // this node indicates where current search reaches
-        
         
         public boolean contains(String key) {
             return newget(key);
@@ -63,25 +54,24 @@ public class BoggleSolver
          * @throws NullPointerException if <tt>key</tt> is <tt>null</tt>
          */
         public void put(String key, Integer val) {
-            if (val == null) delete(key);
+            if (val == null) 
+                delete(key);
             else {
                 root = put(root, key, val, 0);
             }
         }
         
         private Node put(Node x, String key, Integer val, int d) {
-        	if (x == null) {
-        		if (d == 0) {
-        			if(trietest) StdOut.println("put: root should already created ! "); 
-        			throw new java.lang.NullPointerException();
-        		}
-        		else {
-					if(trietest) StdOut.println("put: create a new node at depth: " + d + " for " + key.charAt(d-1));
-					x = new Node();
+            if (x == null) {
+                if (d == 0) {
+        	    throw new java.lang.NullPointerException();
+        	}
+        	else {
+	            x = new Node();
                     x.val = -1;
                     x.word = "*";
-        		}
         	}
+            }
             
             //after creating node x, changing its value and check whether continue for its children
             if (d == (key.length())) {
@@ -96,9 +86,6 @@ public class BoggleSolver
                     x.word = "*";
                 }
 
-//                if (x.next == null) { // this is the first time to create child node under x
-//                    x.next = new Node[R];
-//                }
                 x.next[c-65] = put(x.next[c-65], key, val, d+1);
                 return  x;
             }
@@ -112,13 +99,12 @@ public class BoggleSolver
     public BoggleSolver(String[] dictionary) {
         this.dict = new TrieR26ST();
         for (int i = 0; i < dictionary.length; i++) {
-        	if (dictionary[i].length() > 2) {
-                this.dict.put(dictionary[i], i);
-        	}
+            if (dictionary[i].length() > 2) {
+            this.dict.put(dictionary[i], i);
+            }
        }
     }
 
-     
     private class character {
         private char letter; 
         private int row;
@@ -244,7 +230,6 @@ public class BoggleSolver
         if( c != null ) {
             if (test) {
             	StdOut.println("checkWord: start to check for: " + c.letter);
-            	//if(previous != null) StdOut.println("checkWord : previous: " + previous.letter);
             }
             
             int result = -100;
@@ -271,27 +256,24 @@ public class BoggleSolver
                 if (myneighbour != null ) {
                 	// c has already been used, it is invisible as avaialble dice for its neighbors
                 	setInWord(c);
-                	
-                	//QueueToStack(myneighbout);
+
                 	for ( character neighbor : myneighbour) {
-                		if (test) StdOut.println(" checkWord: " + c.letter +  " has neighboring not searched: " + neighbor.letter );
-                		
                 		if ( c.letter != 'Q' ) {
-                			checkWord( neighbor, nodetocheck.next[c.letter-65]) ;
+                		    checkWord( neighbor, nodetocheck.next[c.letter-65]) ;
                 		}
                 		else {
-                			if ( nodetocheck.next[c.letter-65].next != null && nodetocheck.next[c.letter-65].next['U' - 65] != null) {
-                				if (test) StdOut.println(" checkWord: for Qu directly jump to sub node U for neighbor search "    );
-                				checkWord( neighbor, nodetocheck.next[c.letter-65].next['U' - 65]) ;
+                	            if ( nodetocheck.next[c.letter-65].next != null 
+                	                 && nodetocheck.next[c.letter-65].next['U' - 65] != null) {
+                		            checkWord( neighbor, nodetocheck.next[c.letter-65].next['U' - 65]) ;
                 			}
-
                 		}
                 	}
+                	
                 	//  make sure c is available for above level dices !
                 	removefromWord(c);
                 }
                 else {
-                	return;    // finish this search , choose next letter on board to start next
+                    return;    // finish this search , choose next letter on board to start next
                 }
             }
         }
@@ -326,22 +308,18 @@ public class BoggleSolver
         for ( int i = 0; i < M; i++) {
             for ( int j = 0; j < N; j++) {
                 character startLetter = node[i][j];
-                
-                // every start from a letter on board is a new start
-                //eachsearchStack = new Stack<character>();
-                //eachsearchStack.push(startLetter);
+
                 // scan the whole board and store found words into the wordsQueue
-                if (test) StdOut.println(" getAllValidWords: start a new word search from dict root, startin with: " + startLetter.letter);
                 checkWord(startLetter, this.dict.root);
             }
         }
         
         HashSet<String> uniqueMap = new HashSet<String>() ;
-        for (String word : wordsQueue) {
-        	uniqueMap.add(word) ;
-        }
-        if (test) StdOut.println(" getAllValidWords: finish all checkWord steps, now find words no. of " + wordsQueue.size() + " unqiue: " + uniqueMap.size());
         
+        for (String word : wordsQueue) {
+            uniqueMap.add(word) ;
+        }
+
         return uniqueMap;
     }
 
@@ -371,12 +349,13 @@ public class BoggleSolver
         
         BoggleBoard board = new BoggleBoard(args[1]);
 
-		int score = 0;
-		for (String word : solver.getAllValidWords(board)) {
-			StdOut.println(word);
-			score += solver.scoreOf(word);
-		}
-		StdOut.println("main(): Score = " + score);
+	int score = 0;
+	for (String word : solver.getAllValidWords(board)) {
+	    StdOut.println(word);
+	    score += solver.scoreOf(word);
+	}
+	
+	StdOut.println("main(): Score = " + score);
         
     }
     
